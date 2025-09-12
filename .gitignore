@@ -1,0 +1,12 @@
+# Ignore model checkpoints
+*.pth
+*.pt
+*.zip
+
+# Ignore results and logs
+GAN_Project/results1/
+IEEE_Project/**/*.pth
+IEEE_Project/**/*.zip
+
+# Ignore datasets
+data/
