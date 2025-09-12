@@ -3,10 +3,20 @@
 *.pt
 *.zip
 
-# Ignore results and logs
-GAN_Project/results1/
-IEEE_Project/**/*.pth
-IEEE_Project/**/*.zip
-
 # Ignore datasets
 data/
+datasets/
+*.npy
+
+# Ignore results and logs
+GAN_Project/results1/
+**/checkpoints/
+**/logs/
+**/samples/
+**/reconstructed_images/
+**/heatmap_output/
+
+# Ignore temporary files
+*.tmp
+*.log
+*.DS_Store
