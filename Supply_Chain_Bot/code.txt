@@ -1,0 +1,759 @@
+1. % SupplyChainBot Simulation with Performance Metrics
+
+% Clear workspace and command window
+clear;
+clc;
+
+% Define grid size
+gridSize = 50;
+
+% Create the environment (1 = free space, 0 = obstacle)
+environment = ones(gridSize);
+
+% Add some random obstacles
+numObstacles = 50;
+obstacleIndices = randi([1, gridSize^2], 1, numObstacles);
+environment(obstacleIndices) = 0;
+
+% Initialize robot positions and assign algorithms
+numRobots = 3;
+robotPositions = randi([1, gridSize], numRobots, 2);
+robotAlgorithms = {'A*', 'Dijkstra', 'BFS'};
+robotColors = {'b', 'g', 'y'}; % Blue, green, yellow for robots
+
+% Define dynamic obstacle parameters
+numDynamicObstacles = 3;
+dynamicObstaclePositions = randi([1, gridSize], numDynamicObstacles, 2);
+dynamicObstacleVelocities = (rand(numDynamicObstacles, 2) - 0.5) * 2; % Random velocities between -1 and 1
+
+% Initialize supply points and delivery destinations
+numSupplyPoints = 3;
+numDeliveryPoints = 5;
+supplyPointPositions = randi([1, gridSize], numSupplyPoints, 2);
+deliveryPointPositions = randi([1, gridSize], numDeliveryPoints, 2);
+
+% Create main figure
+mainFigure = figure('Position', [100, 100, 800, 600]);
+
+% Plot environment
+imagesc(environment);
+colormap([1 0 0; 1 1 1]); % Red for obstacles, white for free space
+hold on;
+
+% Plot robots
+robotHandles = gobjects(1, numRobots);
+for i = 1:numRobots
+    robotHandles(i) = plot(robotPositions(i,2), robotPositions(i,1), 'o', 'MarkerSize', 10, 'MarkerFaceColor', robotColors{i}, 'MarkerEdgeColor', 'k');
+end
+
+% Plot supply points and delivery destinations
+supplyPointHandle = plot(supplyPointPositions(:,2), supplyPointPositions(:,1), 's', 'MarkerSize', 10, 'MarkerFaceColor', 'g', 'MarkerEdgeColor', 'k');
+deliveryPointHandle = plot(deliveryPointPositions(:,2), deliveryPointPositions(:,1), 'p', 'MarkerSize', 10, 'MarkerFaceColor', 'm', 'MarkerEdgeColor', 'k');
+
+% Create dynamic obstacle handles
+dynamicObstacleHandles = gobjects(1, numDynamicObstacles);
+for i = 1:numDynamicObstacles
+    dynamicObstacleHandles(i) = plot(dynamicObstaclePositions(i,2), dynamicObstaclePositions(i,1), 's', ...
+        'MarkerSize', 10, 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'k');
+end
+
+% Set up the plot
+axis equal;
+axis([0.5 gridSize+0.5 0.5 gridSize+0.5]);
+title('SupplyChainBot Simulation');
+xlabel('X');
+ylabel('Y');
+
+% Create legend entries with both robot number and algorithm
+legendEntries = cell(1, numRobots);
+for i = 1:numRobots
+    legendEntries{i} = sprintf('Robot %d (%s)', i, robotAlgorithms{i});
+end
+legend([robotHandles, supplyPointHandle, deliveryPointHandle, dynamicObstacleHandles(1)], ...
+    [legendEntries, {'Supply Point', 'Delivery Point', 'Dynamic Obstacle'}], 'Location', 'eastoutside');
+
+% Add path handles for each robot
+pathHandles = gobjects(1, numRobots);
+
+% Initialize metrics
+metrics = struct();
+for i = 1:numRobots
+    metrics.pathLengths(i) = 0;
+    metrics.computationTimes(i) = 0;
+    metrics.deliveriesCompleted(i) = 0;
+    metrics.distanceTraveled(i) = 0;
+end
+
+% Initialize delivery tracking matrix
+deliveryMatrix = zeros(numDeliveryPoints, 1);
+
+% Main simulation loop
+maxSteps = 1000;  % Maximum number of simulation steps
+step = 0;
+
+while sum(deliveryMatrix) < numDeliveryPoints && step < maxSteps
+    step = step + 1;
+    
+    % Update dynamic obstacles
+    for i = 1:numDynamicObstacles
+        % Update position
+        newPosition = dynamicObstaclePositions(i,:) + dynamicObstacleVelocities(i,:);
+        
+        % Bounce off boundaries
+        if newPosition(1) < 1 || newPosition(1) > gridSize
+            dynamicObstacleVelocities(i,1) = -dynamicObstacleVelocities(i,1);
+            newPosition(1) = max(1, min(gridSize, newPosition(1)));
+        end
+        if newPosition(2) < 1 || newPosition(2) > gridSize
+            dynamicObstacleVelocities(i,2) = -dynamicObstacleVelocities(i,2);
+            newPosition(2) = max(1, min(gridSize, newPosition(2)));
+        end
+        
+        % Update position and plot
+        dynamicObstaclePositions(i,:) = newPosition;
+        set(dynamicObstacleHandles(i), 'XData', newPosition(2), 'YData', newPosition(1));
+    end
+    
+    % Robot movement loop
+    for i = 1:numRobots
+        % Find nearest undelivered point
+        undeliveredPoints = find(deliveryMatrix == 0);
+        
+        if ~isempty(undeliveredPoints)
+            distances = zeros(length(undeliveredPoints), 1);
+            for v = 1:length(undeliveredPoints)
+                deliveryIdx = undeliveredPoints(v);
+                distances(v) = norm(deliveryPointPositions(deliveryIdx,:) - robotPositions(i,:));
+            end
+            [~, nearestIdx] = min(distances);
+            targetDeliveryIdx = undeliveredPoints(nearestIdx);
+            goal = deliveryPointPositions(targetDeliveryIdx,:);
+            
+            % Path planning
+            tic;
+            switch lower(robotAlgorithms{i})
+                case 'a*'
+                    path = astar(robotPositions(i,:), goal, environment);
+                case 'dijkstra'
+                    path = dijkstra(robotPositions(i,:), goal, environment);
+                case 'bfs'
+                    path = bfs(robotPositions(i,:), goal, environment);
+            end
+            computationTime = toc;
+            metrics.computationTimes(i) = metrics.computationTimes(i) + computationTime;
+            
+            % Visualize and follow path
+            if ~isempty(path)
+                % Update path visualization
+                if isvalid(pathHandles(i))
+                    delete(pathHandles(i));
+                end
+                pathHandles(i) = plot(path(:,2), path(:,1), ':', 'Color', robotColors{i}, 'LineWidth', 2);
+                
+                % Move robot along path
+                if size(path, 1) > 1
+                    newPosition = path(2,:);
+                    
+                    % Check for collisions with static and dynamic obstacles
+                    collisionDetected = false;
+                    for o = 1:numDynamicObstacles
+                        if norm(newPosition - dynamicObstaclePositions(o,:)) < 1.5
+                            collisionDetected = true;
+                            break;
+                        end
+                    end
+                    
+                    if ~collisionDetected && environment(newPosition(1), newPosition(2)) == 1
+                        oldPosition = robotPositions(i,:);
+                        robotPositions(i,:) = newPosition;
+                        set(robotHandles(i), 'XData', newPosition(2), 'YData', newPosition(1));
+                        
+                        % Update distance traveled
+                        metrics.distanceTraveled(i) = metrics.distanceTraveled(i) + ...
+                            norm(newPosition - oldPosition);
+                    end
+                end
+                
+                % Check if delivery point reached
+                if isequal(robotPositions(i,:), goal)
+                    if deliveryMatrix(targetDeliveryIdx) == 0
+                        deliveryMatrix(targetDeliveryIdx) = 1;
+                        metrics.deliveriesCompleted(i) = metrics.deliveriesCompleted(i) + 1;
+                        
+                        % Update delivery point visualization
+                        remainingDeliveryPoints = find(deliveryMatrix == 0);
+                        if ~isempty(remainingDeliveryPoints)
+                            set(deliveryPointHandle, 'XData', deliveryPointPositions(remainingDeliveryPoints,2), ...
+                                'YData', deliveryPointPositions(remainingDeliveryPoints,1));
+                        else
+                            set(deliveryPointHandle, 'XData', [], 'YData', []);
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    drawnow;
+    pause(0.3);
+end
+
+% Display final metrics
+disp('Final Performance Metrics:');
+for i = 1:numRobots
+    fprintf('Robot %d (%s):\n', i, robotAlgorithms{i});
+    fprintf('  Deliveries Completed: %d\n', metrics.deliveriesCompleted(i));
+    fprintf('  Distance Traveled: %.2f\n', metrics.distanceTraveled(i));
+    fprintf('  Total Computation Time: %.4f seconds\n', metrics.computationTimes(i));
+    fprintf('\n');
+end
+
+% Clean up
+for i = 1:numRobots
+    if isvalid(pathHandles(i))
+        delete(pathHandles(i));
+    end
+end
+
+
+2. % A* Algorithm
+function path = astar(start, goal, map)
+    % A* algorithm for SupplyChainBot pathfinding
+    [rows, cols] = size(map);
+    % Create the open and closed sets
+    openSet = PriorityQueue();
+    closedSet = zeros(size(map));
+    
+    % Add the start node to the open set
+    openSet.insert(start, 0);
+    
+    % Initialize the g_score and f_score maps
+    g_score = inf(size(map));
+    f_score = inf(size(map));
+    g_score(start(1), start(2)) = 0;
+    f_score(start(1), start(2)) = heuristic(start, goal);
+    
+    % Initialize the came_from map
+    came_from = cell(size(map));
+    
+    % Define possible movements (up, down, left, right, diagonals)
+    movements = [-1 0; 1 0; 0 -1; 0 1; -1 -1; -1 1; 1 -1; 1 1];
+
+    while ~openSet.isEmpty()
+        current = openSet.pop();
+        
+        % Check if the goal has been reached
+        if isequal(current, goal)
+            path = reconstructPath(came_from, current);
+            return;
+        end
+        
+        closedSet(current(1), current(2)) = 1;
+        
+        % Loop over all possible movements
+        for i = 1:size(movements, 1)
+            neighbor = current + movements(i, :);
+            
+            % Check if the neighbor is within the map and not an obstacle
+            if neighbor(1) > 0 && neighbor(1) <= rows && ...
+               neighbor(2) > 0 && neighbor(2) <= cols && ...
+               map(neighbor(1), neighbor(2)) ~= 0 && ...
+               closedSet(neighbor(1), neighbor(2)) == 0
+                tentative_g_score = g_score(current(1), current(2)) + 1;
+                
+                if tentative_g_score < g_score(neighbor(1), neighbor(2))
+                    came_from{neighbor(1), neighbor(2)} = current;
+                    g_score(neighbor(1), neighbor(2)) = tentative_g_score;
+                    f_score(neighbor(1), neighbor(2)) = g_score(neighbor(1), neighbor(2)) + heuristic(neighbor, goal);
+                    
+                    if ~openSet.contains(neighbor)
+                        openSet.insert(neighbor, f_score(neighbor(1), neighbor(2)));
+                    else
+                        openSet.decreaseKey(neighbor, f_score(neighbor(1), neighbor(2)));
+                    end
+                end
+            end
+        end
+    end
+    
+    % If no path found, return empty
+    path = [];
+end
+
+% Dijkstra's Algorithm
+function path = dijkstra(start, goal, map)
+    % Dijkstra's algorithm for SupplyChainBot pathfinding
+    [rows, cols] = size(map);
+    
+    % Create the open and closed sets
+    openSet = PriorityQueue();
+    closedSet = zeros(size(map));
+    
+    % Add the start node to the open set
+    openSet.insert(start, 0);
+    
+    % Initialize the g_score map
+    g_score = inf(size(map));
+    g_score(start(1), start(2)) = 0;
+    
+    % Initialize the came_from map
+    came_from = cell(size(map));
+    
+    % Define possible movements (up, down, left, right)
+    movements = [-1 0; 1 0; 0 -1; 0 1];
+
+    while ~openSet.isEmpty()
+        current = openSet.pop();
+        
+        % Check if the goal has been reached
+        if isequal(current, goal)
+            path = reconstructPath(came_from, current);
+            return;
+        end
+        
+        closedSet(current(1), current(2)) = 1;
+        
+        % Loop over all possible movements
+        for i = 1:size(movements, 1)
+            neighbor = current + movements(i, :);
+            
+            % Check if the neighbor is within the map and not an obstacle
+            if neighbor(1) > 0 && neighbor(1) <= rows && ...
+               neighbor(2) > 0 && neighbor(2) <= cols && ...
+               map(neighbor(1), neighbor(2)) ~= 0 && ...
+               closedSet(neighbor(1), neighbor(2)) == 0
+                tentative_g_score = g_score(current(1), current(2)) + 1;
+                
+                if tentative_g_score < g_score(neighbor(1), neighbor(2))
+                    came_from{neighbor(1), neighbor(2)} = current;
+                    g_score(neighbor(1), neighbor(2)) = tentative_g_score;
+                    
+                    if ~openSet.contains(neighbor)
+                        openSet.insert(neighbor, g_score(neighbor(1), neighbor(2)));
+                    else
+                        openSet.decreaseKey(neighbor, g_score(neighbor(1), neighbor(2)));
+                    end
+                end
+            end
+        end
+    end
+    
+    % If no path found, return empty
+    path = [];
+end
+
+% Breadth-First Search (BFS) Algorithm
+function path = bfs(start, goal, map)
+    % BFS algorithm for SupplyChainBot pathfinding
+    [rows, cols] = size(map);
+    
+    % Create the queue for BFS
+    queue = {start};
+    
+    % Initialize the visited map and came_from map
+    visited = zeros(size(map));
+    came_from = cell(size(map));
+    
+    % Mark the start as visited
+    visited(start(1), start(2)) = 1;
+    
+    % Define possible movements (up, down, left, right)
+    movements = [-1 0; 1 0; 0 -1; 0 1];
+
+    while ~isempty(queue)
+        current = queue{1};
+        queue(1) = [];
+        
+        % Check if the goal has been reached
+        if isequal(current, goal)
+            path = reconstructPath(came_from, current);
+            return;
+        end
+        
+        % Loop over all possible movements
+        for i = 1:size(movements, 1)
+            neighbor = current + movements(i, :);
+            
+            % Check if the neighbor is within the map, not an obstacle, and not visited
+            if neighbor(1) > 0 && neighbor(1) <= rows && ...
+               neighbor(2) > 0 && neighbor(2) <= cols && ...
+               map(neighbor(1), neighbor(2)) ~= 0 && ...
+               visited(neighbor(1), neighbor(2)) == 0
+                visited(neighbor(1), neighbor(2)) = 1;
+                came_from{neighbor(1), neighbor(2)} = current;
+                queue{end+1} = neighbor;
+            end
+        end
+    end
+    
+    % If no path found, return empty
+    path = [];
+end
+
+% Helper Functions
+
+% Manhattan distance heuristic
+function h = heuristic(a, b)
+    h = abs(a(1) - b(1)) + abs(a(2) - b(2));
+end
+
+% Reconstruct path from start to goal
+function path = reconstructPath(came_from, current)
+    path = current;
+    while ~isempty(came_from{current(1), current(2)})
+        current = came_from{current(1), current(2)};
+        path = [current; path];
+    end
+end
+
+3. function path = supplyChainBotDijkstra(start, goal, map)
+    [rows, cols] = size(map);
+    
+    % Create the open and closed sets
+    openSet = PriorityQueue();  % Set to track nodes to explore
+    closedSet = zeros(size(map));  % Set to track visited nodes
+    
+    % Add the start node to the open set with a priority of 0
+    openSet.insert(start, 0);
+    
+    % Initialize the cost (g_score) map
+    g_score = inf(size(map));
+    g_score(start(1), start(2)) = 0;
+    
+    % Initialize the path tracking map (came_from)
+    came_from = cell(size(map));
+    
+    % Define possible movements (up, down, left, right) in the grid for the bot
+    movements = [-1 0; 1 0; 0 -1; 0 1];
+    
+    % Dijkstra's loop to explore nodes
+    while ~openSet.isEmpty()
+        current = openSet.pop();  % Pop the node with the lowest cost
+        
+        % Check if the goal is reached
+        if isequal(current, goal)
+            path = reconstructPath(came_from, current);  % Construct path
+            return;
+        end
+        
+        closedSet(current(1), current(2)) = 1;  % Mark the current node as visited
+        
+        % Explore neighboring nodes
+        for i = 1:size(movements, 1)
+            neighbor = current + movements(i, :);
+            
+            % Check if the neighbor is valid and not blocked
+            if neighbor(1) > 0 && neighbor(1) <= rows && ...
+               neighbor(2) > 0 && neighbor(2) <= cols && ...
+               map(neighbor(1), neighbor(2)) ~= 0 && ...  % Check if it's not an obstacle
+               closedSet(neighbor(1), neighbor(2)) == 0  % Ensure the neighbor hasn't been visited
+               
+                % Calculate the cost for the neighbor
+                tentative_g_score = g_score(current(1), current(2)) + 1;  % Assume equal cost between nodes
+                
+                % If the new path is cheaper, update the path and costs
+                if tentative_g_score < g_score(neighbor(1), neighbor(2))
+                    came_from{neighbor(1), neighbor(2)} = current;
+                    g_score(neighbor(1), neighbor(2)) = tentative_g_score;
+                    
+                    % Add or update the neighbor in the open set
+                    if ~openSet.contains(neighbor)
+                        openSet.insert(neighbor, g_score(neighbor(1), neighbor(2)));
+                    else
+                        openSet.decreaseKey(neighbor, g_score(neighbor(1), neighbor(2)));
+                    end
+                end
+            end
+        end
+    end
+    
+    % Return an empty path if no valid path is found
+    path = [];
+end
+
+function path = reconstructPath(came_from, current)
+    path = current;
+    % Trace back the path from the goal to the start
+    while ~isempty(came_from{current(1), current(2)})
+        current = came_from{current(1), current(2)};
+        path = [current; path];  % Prepend the current node to the path
+    end
+end
+
+
+4. function path = supplyChainBotBFS(start, goal, map)
+    [rows, cols] = size(map);
+    
+    % Create a queue for BFS traversal
+    queue = {start};
+    
+    % Initialize visited nodes and path tracking (came_from)
+    visited = zeros(size(map));  % Tracks nodes that have been visited
+    came_from = cell(size(map));  % Tracks the path to each node
+    
+    % Mark the start point as visited
+    visited(start(1), start(2)) = 1;
+    
+    % Define possible movements in the grid (up, down, left, right)
+    movements = [-1 0; 1 0; 0 -1; 0 1];
+    
+    % BFS traversal loop
+    while ~isempty(queue)
+        current = queue{1};  % Get the current node from the queue
+        queue(1) = [];  % Dequeue the current node
+        
+        % If the goal is reached, reconstruct the path and return it
+        if isequal(current, goal)
+            path = reconstructPath(came_from, current);
+            return;
+        end
+        
+        % Explore neighboring nodes
+        for i = 1:size(movements, 1)
+            neighbor = current + movements(i, :);
+            
+            % Check if the neighbor is valid, not an obstacle, and not visited
+            if neighbor(1) > 0 && neighbor(1) <= rows && ...
+               neighbor(2) > 0 && neighbor(2) <= cols && ...
+               map(neighbor(1), neighbor(2)) ~= 0 && ...  % Ensure it's not an obstacle
+               visited(neighbor(1), neighbor(2)) == 0  % Ensure it's not visited
+               
+                % Mark the neighbor as visited and record the path
+                visited(neighbor(1), neighbor(2)) = 1;
+                came_from{neighbor(1), neighbor(2)} = current;
+                
+                % Add the neighbor to the queue for further exploration
+                queue{end+1} = neighbor;
+            end
+        end
+    end
+    
+    % If no path is found, return an empty path
+    path = [];
+end
+
+function path = reconstructPath(came_from, current)
+    path = current;  % Start from the current (goal) node
+    % Trace back the path from goal to start
+    while ~isempty(came_from{current(1), current(2)})
+        current = came_from{current(1), current(2)};
+        path = [current; path];  % Prepend the current node to the path
+    end
+end
+
+
+5. classdef SupplyChainPriorityQueue < handle
+    properties (Access = private)
+        elements   % Cell array to store elements (nodes)
+        priorities % Array to store the associated priorities (costs or distances)
+    end
+    
+    methods
+        function obj = SupplyChainPriorityQueue()
+            obj.elements = {};        % Initialize empty cell array for elements
+            obj.priorities = [];      % Initialize empty array for priorities
+        end
+        
+        % Insert an element with its associated priority
+        function insert(obj, element, priority)
+            obj.elements{end+1} = element;  % Add the new element
+            obj.priorities(end+1) = priority; % Set the associated priority
+        end
+        
+        % Remove and return the element with the highest priority (lowest cost)
+        function element = pop(obj)
+            [~, idx] = min(obj.priorities); % Find index of the element with the lowest priority
+            element = obj.elements{idx};     % Retrieve the element
+            obj.elements(idx) = [];           % Remove the element from the queue
+            obj.priorities(idx) = [];         % Remove the associated priority
+        end
+        
+        % Check if the queue is empty
+        function result = isEmpty(obj)
+            result = isempty(obj.elements); % Return true if there are no elements
+        end
+        
+        % Check if the queue contains a specific element
+        function result = contains(obj, element)
+            result = any(cellfun(@(x) isequal(x, element), obj.elements)); % Return true if the element is found
+        end
+        
+        % Decrease the priority of an element if the new priority is lower
+        function decreaseKey(obj, element, newPriority)
+            idx = find(cellfun(@(x) isequal(x, element), obj.elements), 1); % Find index of the element
+            if ~isempty(idx) && newPriority < obj.priorities(idx) % Check if the new priority is lower
+                obj.priorities(idx) = newPriority; % Update the priority
+            end
+        end
+    end
+end
+
+6. classdef PerformanceMetrics < handle
+    properties
+        pathLengths         % Total path lengths for each robot
+        computationTimes    % Total computation times for each robot
+        deliveriesMade      % Number of deliveries made by each robot
+        distanceTraveled    % Total distance traveled by each robot
+        algorithmNames      % Names of algorithms used for routing
+    end
+    
+    methods
+        function obj = PerformanceMetrics(numRobots, algorithmNames)
+            % Initialize performance metrics for each robot
+            obj.pathLengths = zeros(numRobots, 1);         % Path lengths for each robot
+            obj.computationTimes = zeros(numRobots, 1);    % Computation times for each robot
+            obj.deliveriesMade = zeros(numRobots, 1);      % Deliveries made by each robot
+            obj.distanceTraveled = zeros(numRobots, 1);     % Distance traveled by each robot
+            obj.algorithmNames = algorithmNames;            % Names of algorithms
+        end
+        
+        function updatePathMetrics(obj, robotIndex, pathLength, computationTime)
+            % Update path length and computation time for a specific robot
+            obj.pathLengths(robotIndex) = obj.pathLengths(robotIndex) + pathLength;
+            obj.computationTimes(robotIndex) = obj.computationTimes(robotIndex) + computationTime;
+        end
+        
+        function updateDeliveryMetrics(obj, robotIndex, distance)
+            % Update delivery metrics for a specific robot
+            obj.deliveriesMade(robotIndex) = obj.deliveriesMade(robotIndex) + 1;
+            obj.distanceTraveled(robotIndex) = obj.distanceTraveled(robotIndex) + distance;
+        end
+        
+        function displayMetrics(obj)
+            % Display the performance metrics in a bar graph format
+            figure('Name', 'Supply Chain Performance Metrics', 'Position', [100, 100, 800, 600]);
+            
+            % Path Lengths
+            subplot(2, 2, 1);
+            bar(obj.pathLengths);
+            title('Total Path Length');
+            ylabel('Length (units)');
+            set(gca, 'XTickLabel', obj.algorithmNames);
+            
+            % Computation Times
+            subplot(2, 2, 2);
+            bar(obj.computationTimes);
+            title('Total Computation Time');
+            ylabel('Time (seconds)');
+            set(gca, 'XTickLabel', obj.algorithmNames);
+            
+            % Deliveries Made
+            subplot(2, 2, 3);
+            bar(obj.deliveriesMade);
+            title('Deliveries Made');
+            ylabel('Count');
+            set(gca, 'XTickLabel', obj.algorithmNames);
+            
+            % Distance Traveled
+            subplot(2, 2, 4);
+            bar(obj.distanceTraveled);
+            title('Distance Traveled');
+            ylabel('Distance (units)');
+            set(gca, 'XTickLabel', obj.algorithmNames);
+        end
+    end
+end
+
+
+7. function collision = detectCollision(position, environment, robotPositions)
+    % Check if the position is within the environment bounds
+    [rows, cols] = size(environment);
+    if position(1) < 1 || position(1) > rows || position(2) < 1 || position(2) > cols
+        collision = true; % Out of bounds collision
+        return;
+    end
+    
+    % Check if the position is an obstacle (e.g., walls, barriers)
+    if environment(position(1), position(2)) == 0
+        collision = true; % Obstacle collision
+        return;
+    end
+    
+    % Check if the position collides with other supply chain robots
+    for i = 1:size(robotPositions, 1)
+        if all(position == robotPositions(i,:))
+            collision = true; % Robot collision
+            return;
+        end
+    end
+    
+    % If we've made it here, there's no collision
+    collision = false;
+end
+8. function path = genetic_algorithm(startPos, goalPos, environment)
+    % GA parameters
+    populationSize = 50;  % Number of candidate paths
+    mutationRate = 0.1;   % Chance of mutation
+    numGenerations = 100;  % Number of iterations to run the GA
+    
+    % Initialize population
+    population = initialize_population(populationSize, startPos, goalPos, environment);
+    
+    for gen = 1:numGenerations
+        % Evaluate fitness of each candidate path
+        fitness = evaluate_population(population, goalPos, environment);
+        
+        % Select parents
+        parents = select_parents(population, fitness);
+        
+        % Produce offspring via crossover and mutation
+        offspring = reproduce(parents, mutationRate);
+        
+        % Replace old population with new generation
+        population = offspring;
+    end
+    
+    % Return the best path from the final population
+    [~, bestIdx] = max(fitness);
+    path = population{bestIdx};
+end
+
+function population = initialize_population(populationSize, startPos, goalPos, environment)
+    % Generate random paths as initial population
+    population = cell(populationSize, 1);
+    for i = 1:populationSize
+        path = generate_random_path(startPos, goalPos, environment);
+        population{i} = path;
+    end
+end
+
+function fitness = evaluate_population(population, goalPos, environment)
+    % Evaluate fitness based on distance to goal and number of collisions
+    fitness = zeros(size(population));
+    for i = 1:length(population)
+        path = population{i};
+        fitness(i) = -path_length(path) - num_collisions(path, environment); % Higher is better
+    end
+end
+
+function parents = select_parents(population, fitness)
+    % Select paths with higher fitness to produce offspring
+    numParents = length(population);
+    parents = population(tournament_selection(fitness, numParents));
+end
+
+function offspring = reproduce(parents, mutationRate)
+    % Perform crossover and mutation to create new paths
+    numParents = length(parents);
+    offspring = cell(numParents, 1);
+    for i = 1:2:numParents
+        parent1 = parents{i};
+        parent2 = parents{min(i+1, numParents)}; % Handle odd number of parents
+        child = crossover(parent1, parent2);
+        offspring{i} = mutate(child, mutationRate);
+    end
+end
+
+function path = crossover(parent1, parent2)
+    % Combine two parent paths to produce a child path
+    crossoverPoint = randi(length(parent1));
+    path = [parent1(1:crossoverPoint, :); parent2(crossoverPoint+1:end, :)];
+end
+
+function path = mutate(path, mutationRate)
+    % Mutate the path by randomly changing a point
+    if rand < mutationRate
+        mutationPoint = randi(size(path, 1));
+        path(mutationPoint, :) = path(mutationPoint, :) + (rand(1, 2) - 0.5) * 2; % Random change
+    end
+end

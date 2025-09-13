@@ -1,0 +1,270 @@
+% SupplyChainBot Simulation with Performance Metrics and Enhanced Visuals
+
+% Clear workspace and command window
+clear;
+clc;
+
+% Define grid size
+gridSize = 50;
+
+% Create the environment (1 = free space, 0 = obstacle)
+environment = ones(gridSize);
+
+% Add some random obstacles
+numObstacles = 50;
+obstacleIndices = randi([1, gridSize^2], 1, numObstacles);
+environment(obstacleIndices) = 0;
+
+% Initialize robot positions and assign algorithms
+numRobots = 4;
+robotPositions = randi([1, gridSize], numRobots, 2);
+robotAlgorithms = {'A*', 'Dijkstra', 'BFS', 'Genetic Hybrid'};
+robotColors = {'b', 'g', 'y', 'm'};
+
+% Define dynamic obstacle parameters
+numDynamicObstacles = 3;
+dynamicObstaclePositions = randi([1, gridSize], numDynamicObstacles, 2);
+dynamicObstacleVelocities = (rand(numDynamicObstacles, 2) - 0.5) * 2; % Random velocities between -1 and 1
+
+% Initialize supply points and delivery destinations
+numSupplyPoints = 3;
+numDeliveryPoints = 5;
+supplyPointPositions = randi([1, gridSize], numSupplyPoints, 2);
+deliveryPointPositions = randi([1, gridSize], numDeliveryPoints, 2);
+
+% Create main figure with a darker background for contrast
+mainFigure = figure('Position', [100, 100, 1000, 750], 'Color', [0.15 0.15 0.15]);
+
+% Plot environment with a custom colormap
+imagesc(environment);
+customMap = [0.8 0.2 0.2; 0.2 0.2 0.2]; % Red for obstacles, dark gray for free space
+colormap(customMap);
+hold on;
+
+% Create a lighting effect
+lightangle(-45, 30);
+lighting gouraud;
+
+% Plot robots with unique 3D shapes
+robotHandles = gobjects(1, numRobots);
+for i = 1:numRobots
+    [x, y, z] = sphere(20);
+    robotHandles(i) = surf(x*0.4 + robotPositions(i,2), y*0.4 + robotPositions(i,1), z*0.4 + 0.5, ...
+        'FaceColor', robotColors{i}, 'EdgeColor', 'none', 'FaceLighting', 'gouraud');
+end
+
+% Plot supply points and delivery destinations with 3D effect
+[x, y, z] = cylinder(0.3, 20);
+supplyPointHandles = gobjects(1, numSupplyPoints);
+for i = 1:numSupplyPoints
+    supplyPointHandles(i) = surf(x + supplyPointPositions(i,2), y + supplyPointPositions(i,1), z*0.5, ...
+        'FaceColor', 'g', 'EdgeColor', 'k', 'FaceLighting', 'gouraud');
+end
+
+[x, y, z] = cylinder([0.4 0], 20);
+deliveryPointHandles = gobjects(1, numDeliveryPoints);
+for i = 1:numDeliveryPoints
+    deliveryPointHandles(i) = surf(x + deliveryPointPositions(i,2), y + deliveryPointPositions(i,1), z*0.5, ...
+        'FaceColor', 'm', 'EdgeColor', 'k', 'FaceLighting', 'gouraud');
+end
+
+% Create dynamic obstacle handles with pulsating effect
+dynamicObstacleHandles = gobjects(1, numDynamicObstacles);
+for i = 1:numDynamicObstacles
+    [x, y, z] = sphere(20);
+    dynamicObstacleHandles(i) = surf(x*0.3 + dynamicObstaclePositions(i,2), ...
+        y*0.3 + dynamicObstaclePositions(i,1), z*0.3 + 0.5, ...
+        'FaceColor', 'r', 'EdgeColor', 'none', 'FaceLighting', 'gouraud');
+end
+
+% Set up the plot
+axis equal;
+axis([0.5 gridSize+0.5 0.5 gridSize+0.5 0 1]);
+title('SupplyChainBot Simulation', 'Color', 'w', 'FontSize', 16);
+xlabel('X', 'Color', 'w');
+ylabel('Y', 'Color', 'w');
+zlabel('Z', 'Color', 'w');
+set(gca, 'Color', [0.15 0.15 0.15], 'XColor', 'w', 'YColor', 'w', 'ZColor', 'w');
+
+% Create legend entries with both robot number and algorithm
+legendEntries = cell(1, numRobots);
+for i = 1:numRobots
+    legendEntries{i} = sprintf('Robot %d (%s)', i, robotAlgorithms{i});
+end
+legend([robotHandles, supplyPointHandles(1), deliveryPointHandles(1), dynamicObstacleHandles(1)], ...
+    [legendEntries, {'Supply Point', 'Delivery Point', 'Dynamic Obstacle'}], ...
+    'Location', 'eastoutside', 'TextColor', 'w', 'Color', [0.2 0.2 0.2]);
+
+% Add path handles for each robot
+pathHandles = gobjects(1, numRobots);
+
+% Initialize metrics
+metrics = struct();
+for i = 1:numRobots
+    metrics.pathLengths(i) = 0;
+    metrics.computationTimes(i) = 0;
+    metrics.deliveriesCompleted(i) = 0;
+    metrics.distanceTraveled(i) = 0;
+end
+
+% Initialize delivery tracking matrix
+deliveryMatrix = zeros(numDeliveryPoints, 1);
+
+% Initialize supply tracking matrix
+supplyMatrix = zeros(numRobots, 1);
+
+% Main simulation loop
+maxSteps = 1000;
+step = 0;
+
+[rows, cols] = size(environment);
+
+while sum(deliveryMatrix) < numDeliveryPoints && step < maxSteps
+    step = step + 1;
+    
+    % Update dynamic obstacles with pulsating effect
+    for i = 1:numDynamicObstacles
+        newPosition = round(dynamicObstaclePositions(i,:) + dynamicObstacleVelocities(i,:));
+        
+        if newPosition(1) < 1 || newPosition(1) > gridSize
+            dynamicObstacleVelocities(i,1) = -dynamicObstacleVelocities(i,1);
+            newPosition(1) = max(1, min(gridSize, newPosition(1)));
+        end
+        if newPosition(2) < 1 || newPosition(2) > gridSize
+            dynamicObstacleVelocities(i,2) = -dynamicObstacleVelocities(i,2);
+            newPosition(2) = max(1, min(gridSize, newPosition(2)));
+        end
+        
+        dynamicObstaclePositions(i,:) = newPosition;
+        scale = 0.3 + 0.05 * sin(step * 0.2); % Pulsating effect
+        set(dynamicObstacleHandles(i), 'XData', scale*x + newPosition(2), ...
+            'YData', scale*y + newPosition(1), 'ZData', scale*z + 0.5);
+    end
+    
+    % Robot movement loop
+    for i = 1:numRobots
+        % Determine the current goal (supply point or delivery point)
+        if supplyMatrix(i) == 0
+            distances = zeros(numSupplyPoints, 1);
+            for v = 1:numSupplyPoints
+                distances(v) = norm(supplyPointPositions(v,:) - robotPositions(i,:));
+            end
+            [~, nearestIdx] = min(distances);
+            goal = supplyPointPositions(nearestIdx,:);
+            isSupplyGoal = true;
+        else
+            undeliveredPoints = find(deliveryMatrix == 0);
+            
+            if ~isempty(undeliveredPoints)
+                distances = zeros(length(undeliveredPoints), 1);
+                for v = 1:length(undeliveredPoints)
+                    deliveryIdx = undeliveredPoints(v);
+                    distances(v) = norm(deliveryPointPositions(deliveryIdx,:) - robotPositions(i,:));
+                end
+                [~, nearestIdx] = min(distances);
+                targetDeliveryIdx = undeliveredPoints(nearestIdx);
+                goal = deliveryPointPositions(targetDeliveryIdx,:);
+                isSupplyGoal = false;
+            else
+                continue;
+            end
+        end
+        
+        % Path planning
+        tic;
+        switch lower(robotAlgorithms{i})
+            case 'a*'
+                path = astar(round(robotPositions(i,:)), round(goal), environment);
+            case 'dijkstra'
+                path = dijkstra(round(robotPositions(i,:)), round(goal), environment);
+            case 'bfs'
+                path = bfs(round(robotPositions(i,:)), round(goal), environment);
+            case 'genetic hybrid'
+                path = genetic_algorithm_hybrid(round(robotPositions(i,:)), round(goal), environment, @(start, goal, env) astar(start, goal, env));
+        end
+        computationTime = toc;
+        metrics.computationTimes(i) = metrics.computationTimes(i) + computationTime;
+        
+        % Visualize and follow path
+        if ~isempty(path)
+            if isvalid(pathHandles(i))
+                delete(pathHandles(i));
+            end
+            pathHandles(i) = plot3(path(:,2), path(:,1), ones(size(path,1),1)*0.1, ...
+                ':', 'Color', robotColors{i}, 'LineWidth', 2);
+            
+            if size(path, 1) > 1
+                newPosition = path(2,:);
+                
+                collisionDetected = false;
+                for o = 1:numDynamicObstacles
+                    if norm(newPosition - dynamicObstaclePositions(o,:)) < 1.5
+                        collisionDetected = true;
+                        break;
+                    end
+                end
+                
+                if ~collisionDetected && environment(newPosition(1), newPosition(2)) == 1
+                    oldPosition = robotPositions(i,:);
+                    % Smooth transition for robot movement
+                    for t = 0:0.1:1
+                        intermediatePosition = oldPosition * (1-t) + newPosition * t;
+                        set(robotHandles(i), 'XData', x*0.4 + intermediatePosition(2), ...
+                            'YData', y*0.4 + intermediatePosition(1), 'ZData', z*0.4 + 0.5);
+                        drawnow;
+                    end
+                    robotPositions(i,:) = newPosition;
+                    
+                    metrics.distanceTraveled(i) = metrics.distanceTraveled(i) + norm(newPosition - oldPosition);
+                end
+            end
+            
+            if isequal(round(robotPositions(i,:)), round(goal))
+                if isSupplyGoal
+                    supplyMatrix(i) = 1;
+                else
+                    if deliveryMatrix(targetDeliveryIdx) == 0
+                        deliveryMatrix(targetDeliveryIdx) = 1;
+                        supplyMatrix(i) = 0;
+                        metrics.deliveriesCompleted(i) = metrics.deliveriesCompleted(i) + 1;
+                        
+                        remainingDeliveryPoints = find(deliveryMatrix == 0);
+                        if ~isempty(remainingDeliveryPoints)
+                            for j = 1:numDeliveryPoints
+                                if ismember(j, remainingDeliveryPoints)
+                                    set(deliveryPointHandles(j), 'Visible', 'on');
+                                else
+                                    set(deliveryPointHandles(j), 'Visible', 'off');
+                                end
+                            end
+                        else
+                            for j = 1:numDeliveryPoints
+                                set(deliveryPointHandles(j), 'Visible', 'off');
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    drawnow;
+    pause(0.1);
+end
+
+% Display final metrics
+disp('Final Performance Metrics:');
+for i = 1:numRobots
+    fprintf('Robot %d (%s):\n', i, robotAlgorithms{i});
+    fprintf('  Deliveries Completed: %d\n', metrics.deliveriesCompleted(i));
+    fprintf('  Distance Traveled: %.2f\n', metrics.distanceTraveled(i));
+    fprintf('  Total Computation Time: %.4f seconds\n', metrics.computationTimes(i));
+    fprintf('\n');
+end
+
+% Clean up
+for i = 1:numRobots
+    if isvalid(pathHandles(i))
+        delete(pathHandles(i));
+    end
+end

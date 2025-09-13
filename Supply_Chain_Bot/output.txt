@@ -1,0 +1,15 @@
+Final Performance Metrics:
+Robot 1 (A*):
+  Victims Rescued: 2
+  Distance Traveled: 60.91
+  Total Computation Time: 0.1980 seconds
+
+Robot 2 (Dijkstra):
+  Victims Rescued: 2
+  Distance Traveled: 48.00
+  Total Computation Time: 1.5352 seconds
+
+Robot 3 (BFS):
+  Victims Rescued: 1
+  Distance Traveled: 48.00
+  Total Computation Time: 0.0964 seconds
