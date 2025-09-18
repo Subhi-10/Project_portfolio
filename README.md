@@ -17,8 +17,14 @@ Each project folder includes the code and results.
 - **AI-Based Word Game** (Python)  
   Developed a word pathfinding game using A* and Dijkstra’s algorithms for dynamic gameplay.
 
-- ** ML-Based Word Puzzle Game** (Python, Unity)  
+- **ML-Based Word Puzzle Game** (Python, Unity)  
   Created story-based puzzle game with LLM-based content generation and interactive narrative.
 
 - **IEEE GenLIFE – Generative AI-Based Affordable Solutions for Transforming Rural Healthcare**  
-  Focused on EEG-based Parkinson’s diagnosis using GANs, CNNs, and LLMs.
+  Focused on EEG-based Parkinson’s diagnosis using GANs, CNNs and LLMs.
+
+### Gait Estimation Project
+- **A Deep Learning Approach to Accurate Human Gait Estimation and Monitoring** (Python)  
+  Developed CNN, RNN, and LSTM models for estimating gait parameters including knee joint angles, stride length, and walking speed from IMU-based gait data.  
+  Dataset was collected in collaboration with the **Ministry of Defence** and is not publicly available due to confidentiality.  
+  Repository includes preprocessing scripts, model training pipelines, and visualization of results.
