@@ -14,7 +14,7 @@ Due to storage constraints, only a reduced version is uploaded here.
 
 - **damaged/**  
   Contains the **damaged counterparts of the 50 subset images**.  
-  Each image in `subset_complete/` has a corresponding damaged version in this folder.
+  Each image in `complete/` has a corresponding damaged version in this folder.
 
 ---
 
