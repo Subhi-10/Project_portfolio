@@ -24,5 +24,4 @@ Each project folder includes the code and results.
   Focused on EEG-based Parkinson’s diagnosis using GANs, CNNs and LLMs.
   
 - **A Deep Learning Approach to Accurate Human Gait Estimation and Monitoring** (Python)  
-  Developed CNN, RNN, and LSTM models for estimating gait parameters including knee joint angles, stride length, and walking speed from IMU-based gait data. Dataset was collected in collaboration with the **Ministry of Defence** and is not publicly available due to confidentiality.  
-  Repository includes preprocessing scripts, model training pipelines, and visualization of results.
+  Developed CNN, RNN, and LSTM models for estimating gait parameters including knee joint angles, stride length, and walking speed from IMU-based gait data. Dataset was collected in collaboration with the **Ministry of Defence** and is not publicly available due to confidentiality. Repository includes preprocessing scripts, model training pipelines, and visualization of results.
