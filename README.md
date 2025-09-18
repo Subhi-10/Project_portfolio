@@ -22,8 +22,7 @@ Each project folder includes the code and results.
 
 - **IEEE GenLIFE – Generative AI-Based Affordable Solutions for Transforming Rural Healthcare**  
   Focused on EEG-based Parkinson’s diagnosis using GANs, CNNs and LLMs.
-
-### Gait Estimation Project
+  
 - **A Deep Learning Approach to Accurate Human Gait Estimation and Monitoring** (Python)  
   Developed CNN, RNN, and LSTM models for estimating gait parameters including knee joint angles, stride length, and walking speed from IMU-based gait data.  
   Dataset was collected in collaboration with the **Ministry of Defence** and is not publicly available due to confidentiality.  
