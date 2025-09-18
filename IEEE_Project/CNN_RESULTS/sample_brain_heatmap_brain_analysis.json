@@ -1,0 +1,120 @@
+{
+  "file_info": {
+    "heatmap_path": "E:\\Desktop\\IEEE\\CNN_RESULTS\\sample_brain_heatmap.png",
+    "analysis_timestamp": "2025-08-14T19:27:41.518960",
+    "model_loaded": true
+  },
+  "detected_issues": {
+    "low_activity_nodes": [
+      0,
+      1,
+      12,
+      13
+    ],
+    "node_activity_levels": [
+      0.0,
+      0.9647058844566345,
+      1.6901962757110596,
+      2.560784339904785,
+      2.9529411792755127,
+      3.9058825969696045,
+      3.4980392456054688,
+      3.2941176891326904,
+      3.5568628311157227,
+      3.1372549533843994,
+      2.4196078777313232,
+      1.7137256860733032,
+      0.9647058844566345,
+      0.0
+    ],
+    "total_affected_nodes": 4
+  },
+  "brain_analysis": {
+    "node_0": {
+      "node_index": 0,
+      "electrode_name": "Fp1",
+      "brain_region": "Frontal",
+      "hemisphere": "Left",
+      "functional_area": "Prefrontal",
+      "function_description": "Executive Control, Decision Making",
+      "activity_level": 0.0,
+      "predicted_activity": 0.999210000038147,
+      "confidence_scores": {
+        "electrode": 0.234597846865654,
+        "region": 0.5245930552482605,
+        "hemisphere": 0.6633172035217285,
+        "functional": 0.34335455298423767
+      }
+    },
+    "node_1": {
+      "node_index": 1,
+      "electrode_name": "Fp2",
+      "brain_region": "Frontal",
+      "hemisphere": "Right",
+      "functional_area": "Prefrontal",
+      "function_description": "Executive Control, Decision Making",
+      "activity_level": 0.9647058844566345,
+      "predicted_activity": 0.999210000038147,
+      "confidence_scores": {
+        "electrode": 0.234597846865654,
+        "region": 0.5245930552482605,
+        "hemisphere": 0.6633172035217285,
+        "functional": 0.34335455298423767
+      }
+    },
+    "node_12": {
+      "node_index": 12,
+      "electrode_name": "O1",
+      "brain_region": "Occipital",
+      "hemisphere": "Left",
+      "functional_area": "Visual",
+      "function_description": "Visual Processing",
+      "activity_level": 0.9647058844566345,
+      "predicted_activity": 0.999210000038147,
+      "confidence_scores": {
+        "electrode": 0.234597846865654,
+        "region": 0.5245930552482605,
+        "hemisphere": 0.6633172035217285,
+        "functional": 0.34335455298423767
+      }
+    },
+    "node_13": {
+      "node_index": 13,
+      "electrode_name": "O2",
+      "brain_region": "Occipital",
+      "hemisphere": "Right",
+      "functional_area": "Visual",
+      "function_description": "Visual Processing",
+      "activity_level": 0.0,
+      "predicted_activity": 0.999210000038147,
+      "confidence_scores": {
+        "electrode": 0.234597846865654,
+        "region": 0.5245930552482605,
+        "hemisphere": 0.6633172035217285,
+        "functional": 0.34335455298423767
+      }
+    }
+  },
+  "clinical_summary": {
+    "affected_regions": [
+      "Frontal",
+      "Occipital"
+    ],
+    "affected_hemispheres": [
+      "Right",
+      "Left"
+    ],
+    "functional_systems_impacted": [
+      "Visual",
+      "Prefrontal"
+    ],
+    "electrodes_with_issues": [
+      "O2",
+      "O1",
+      "Fp2",
+      "Fp1"
+    ],
+    "severity_level": "MODERATE - Notable connectivity issues",
+    "clinical_interpretation": "Executive function, decision-making, and motor planning difficulties; Visual processing and perception difficulties; Visual recognition and processing difficulties; Planning and executive control deficits"
+  }
+}

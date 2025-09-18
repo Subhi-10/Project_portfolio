@@ -1,0 +1,120 @@
+{
+  "file_info": {
+    "heatmap_path": "E:\\Desktop\\IEEE\\heatmap_output\\heatmap_sev2_sample10.png",
+    "analysis_timestamp": "2025-08-09T13:37:21.289725",
+    "model_loaded": true
+  },
+  "detected_issues": {
+    "low_activity_nodes": [
+      0,
+      1,
+      3,
+      5
+    ],
+    "node_activity_levels": [
+      3.0,
+      8.22745132446289,
+      8.67843246459961,
+      8.403922080993652,
+      8.988235473632812,
+      8.443138122558594,
+      8.619607925415039,
+      8.909804344177246,
+      8.850980758666992,
+      8.784314155578613,
+      8.678431510925293,
+      8.81176471710205,
+      9.027451515197754,
+      14.0
+    ],
+    "total_affected_nodes": 4
+  },
+  "brain_analysis": {
+    "node_0": {
+      "node_index": 0,
+      "electrode_name": "Fp1",
+      "brain_region": "Frontal",
+      "hemisphere": "Left",
+      "functional_area": "Prefrontal",
+      "function_description": "Executive Control, Decision Making",
+      "activity_level": 3.0,
+      "predicted_activity": 0.9767199158668518,
+      "confidence_scores": {
+        "electrode": 0.1546994298696518,
+        "region": 0.4221241772174835,
+        "hemisphere": 0.5125185251235962,
+        "functional": 0.21161124110221863
+      }
+    },
+    "node_1": {
+      "node_index": 1,
+      "electrode_name": "Fp2",
+      "brain_region": "Frontal",
+      "hemisphere": "Right",
+      "functional_area": "Prefrontal",
+      "function_description": "Executive Control, Decision Making",
+      "activity_level": 8.22745132446289,
+      "predicted_activity": 0.9767199158668518,
+      "confidence_scores": {
+        "electrode": 0.1546994298696518,
+        "region": 0.4221241772174835,
+        "hemisphere": 0.5125185251235962,
+        "functional": 0.21161124110221863
+      }
+    },
+    "node_3": {
+      "node_index": 3,
+      "electrode_name": "F4",
+      "brain_region": "Frontal",
+      "hemisphere": "Right",
+      "functional_area": "Motor",
+      "function_description": "Motor Control, Movement Planning",
+      "activity_level": 8.403922080993652,
+      "predicted_activity": 0.9767199158668518,
+      "confidence_scores": {
+        "electrode": 0.1546994298696518,
+        "region": 0.4221241772174835,
+        "hemisphere": 0.5125185251235962,
+        "functional": 0.21161124110221863
+      }
+    },
+    "node_5": {
+      "node_index": 5,
+      "electrode_name": "F8",
+      "brain_region": "Frontal",
+      "hemisphere": "Right",
+      "functional_area": "Temporal-Frontal",
+      "function_description": "Language, Working Memory",
+      "activity_level": 8.443138122558594,
+      "predicted_activity": 0.9767199158668518,
+      "confidence_scores": {
+        "electrode": 0.1546994298696518,
+        "region": 0.4221241772174835,
+        "hemisphere": 0.5125185251235962,
+        "functional": 0.21161124110221863
+      }
+    }
+  },
+  "clinical_summary": {
+    "affected_regions": [
+      "Frontal"
+    ],
+    "affected_hemispheres": [
+      "Left",
+      "Right"
+    ],
+    "functional_systems_impacted": [
+      "Temporal-Frontal",
+      "Prefrontal",
+      "Motor"
+    ],
+    "electrodes_with_issues": [
+      "Fp2",
+      "F8",
+      "F4",
+      "Fp1"
+    ],
+    "severity_level": "MODERATE - Notable connectivity issues",
+    "clinical_interpretation": "Executive function, decision-making, and motor planning difficulties; Planning and executive control deficits; Movement initiation and control issues"
+  }
+}

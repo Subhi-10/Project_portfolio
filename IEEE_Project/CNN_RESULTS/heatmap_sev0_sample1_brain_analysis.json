@@ -1,0 +1,140 @@
+{
+  "file_info": {
+    "heatmap_path": "E:\\Desktop\\IEEE\\heatmap_output\\heatmap_sev0_sample1.png",
+    "analysis_timestamp": "2025-08-12T21:20:34.071226",
+    "model_loaded": true
+  },
+  "detected_issues": {
+    "low_activity_nodes": [
+      0,
+      1,
+      6,
+      7,
+      11
+    ],
+    "node_activity_levels": [
+      3.0,
+      7.341176986694336,
+      7.388236045837402,
+      7.345098495483398,
+      7.568628311157227,
+      7.525491237640381,
+      7.341176986694336,
+      7.211765289306641,
+      7.341177463531494,
+      7.611765384674072,
+      7.388236045837402,
+      7.2549028396606445,
+      7.568627834320068,
+      14.0
+    ],
+    "total_affected_nodes": 5
+  },
+  "brain_analysis": {
+    "node_0": {
+      "node_index": 0,
+      "electrode_name": "Fp1",
+      "brain_region": "Frontal",
+      "hemisphere": "Left",
+      "functional_area": "Prefrontal",
+      "function_description": "Executive Control, Decision Making",
+      "activity_level": 3.0,
+      "predicted_activity": 0.999763548374176,
+      "confidence_scores": {
+        "electrode": 0.2801802158355713,
+        "region": 0.573176920413971,
+        "hemisphere": 0.7013932466506958,
+        "functional": 0.3881562650203705
+      }
+    },
+    "node_1": {
+      "node_index": 1,
+      "electrode_name": "Fp2",
+      "brain_region": "Frontal",
+      "hemisphere": "Right",
+      "functional_area": "Prefrontal",
+      "function_description": "Executive Control, Decision Making",
+      "activity_level": 7.341176986694336,
+      "predicted_activity": 0.999763548374176,
+      "confidence_scores": {
+        "electrode": 0.2801802158355713,
+        "region": 0.573176920413971,
+        "hemisphere": 0.7013932466506958,
+        "functional": 0.3881562650203705
+      }
+    },
+    "node_6": {
+      "node_index": 6,
+      "electrode_name": "C3",
+      "brain_region": "Central",
+      "hemisphere": "Left",
+      "functional_area": "Sensorimotor",
+      "function_description": "Touch, Motor Execution",
+      "activity_level": 7.341176986694336,
+      "predicted_activity": 0.999763548374176,
+      "confidence_scores": {
+        "electrode": 0.2801802158355713,
+        "region": 0.573176920413971,
+        "hemisphere": 0.7013932466506958,
+        "functional": 0.3881562650203705
+      }
+    },
+    "node_7": {
+      "node_index": 7,
+      "electrode_name": "C4",
+      "brain_region": "Central",
+      "hemisphere": "Right",
+      "functional_area": "Sensorimotor",
+      "function_description": "Touch, Motor Execution",
+      "activity_level": 7.211765289306641,
+      "predicted_activity": 0.999763548374176,
+      "confidence_scores": {
+        "electrode": 0.2801802158355713,
+        "region": 0.573176920413971,
+        "hemisphere": 0.7013932466506958,
+        "functional": 0.3881562650203705
+      }
+    },
+    "node_11": {
+      "node_index": 11,
+      "electrode_name": "P4",
+      "brain_region": "Parietal",
+      "hemisphere": "Right",
+      "functional_area": "Somatosensory",
+      "function_description": "Touch, Spatial Processing",
+      "activity_level": 7.2549028396606445,
+      "predicted_activity": 0.999763548374176,
+      "confidence_scores": {
+        "electrode": 0.2801802158355713,
+        "region": 0.573176920413971,
+        "hemisphere": 0.7013932466506958,
+        "functional": 0.3881562650203705
+      }
+    }
+  },
+  "clinical_summary": {
+    "affected_regions": [
+      "Central",
+      "Frontal",
+      "Parietal"
+    ],
+    "affected_hemispheres": [
+      "Right",
+      "Left"
+    ],
+    "functional_systems_impacted": [
+      "Somatosensory",
+      "Sensorimotor",
+      "Prefrontal"
+    ],
+    "electrodes_with_issues": [
+      "C4",
+      "C3",
+      "Fp1",
+      "Fp2",
+      "P4"
+    ],
+    "severity_level": "SEVERE - Significant network disruption",
+    "clinical_interpretation": "Sensorimotor control and coordination problems; Executive function, decision-making, and motor planning difficulties; Spatial awareness and sensory integration problems; Touch and motor coordination problems; Planning and executive control deficits"
+  }
+}

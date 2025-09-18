@@ -1,0 +1,123 @@
+{
+  "file_info": {
+    "heatmap_path": "E:\\Desktop\\IEEE\\heatmap_output\\heatmap_sev3_sample8.png",
+    "analysis_timestamp": "2025-08-09T13:30:38.427985",
+    "model_loaded": true
+  },
+  "detected_issues": {
+    "low_activity_nodes": [
+      0,
+      3,
+      7,
+      11
+    ],
+    "node_activity_levels": [
+      3.0,
+      9.831372261047363,
+      10.160784721374512,
+      7.941175937652588,
+      9.564704895019531,
+      9.478431701660156,
+      9.090195655822754,
+      8.039215087890625,
+      9.81176471710205,
+      8.854901313781738,
+      8.980392456054688,
+      8.678431510925293,
+      9.34117603302002,
+      14.0
+    ],
+    "total_affected_nodes": 4
+  },
+  "brain_analysis": {
+    "node_0": {
+      "node_index": 0,
+      "electrode_name": "Fp1",
+      "brain_region": "Frontal",
+      "hemisphere": "Left",
+      "functional_area": "Prefrontal",
+      "function_description": "Executive Control, Decision Making",
+      "activity_level": 3.0,
+      "predicted_activity": 0.9707546234130859,
+      "confidence_scores": {
+        "electrode": 0.1488366425037384,
+        "region": 0.40774476528167725,
+        "hemisphere": 0.5117802023887634,
+        "functional": 0.20796819031238556
+      }
+    },
+    "node_3": {
+      "node_index": 3,
+      "electrode_name": "F4",
+      "brain_region": "Frontal",
+      "hemisphere": "Right",
+      "functional_area": "Motor",
+      "function_description": "Motor Control, Movement Planning",
+      "activity_level": 7.941175937652588,
+      "predicted_activity": 0.9707546234130859,
+      "confidence_scores": {
+        "electrode": 0.1488366425037384,
+        "region": 0.40774476528167725,
+        "hemisphere": 0.5117802023887634,
+        "functional": 0.20796819031238556
+      }
+    },
+    "node_7": {
+      "node_index": 7,
+      "electrode_name": "C4",
+      "brain_region": "Central",
+      "hemisphere": "Right",
+      "functional_area": "Sensorimotor",
+      "function_description": "Touch, Motor Execution",
+      "activity_level": 8.039215087890625,
+      "predicted_activity": 0.9707546234130859,
+      "confidence_scores": {
+        "electrode": 0.1488366425037384,
+        "region": 0.40774476528167725,
+        "hemisphere": 0.5117802023887634,
+        "functional": 0.20796819031238556
+      }
+    },
+    "node_11": {
+      "node_index": 11,
+      "electrode_name": "P4",
+      "brain_region": "Parietal",
+      "hemisphere": "Right",
+      "functional_area": "Somatosensory",
+      "function_description": "Touch, Spatial Processing",
+      "activity_level": 8.678431510925293,
+      "predicted_activity": 0.9707546234130859,
+      "confidence_scores": {
+        "electrode": 0.1488366425037384,
+        "region": 0.40774476528167725,
+        "hemisphere": 0.5117802023887634,
+        "functional": 0.20796819031238556
+      }
+    }
+  },
+  "clinical_summary": {
+    "affected_regions": [
+      "Central",
+      "Parietal",
+      "Frontal"
+    ],
+    "affected_hemispheres": [
+      "Left",
+      "Right"
+    ],
+    "functional_systems_impacted": [
+      "Prefrontal",
+      "Sensorimotor",
+      "Motor",
+      "Somatosensory"
+    ],
+    "electrodes_with_issues": [
+      "Fp1",
+      "F4",
+      "P4",
+      "C4"
+    ],
+    "severity_level": "SEVERE - Significant network disruption",
+    "clinical_interpretation": "Sensorimotor control and coordination problems; Spatial awareness and sensory integration problems; Executive function, decision-making, and motor planning difficulties; Planning and executive control deficits; Touch and motor coordination problems; Movement initiation and control issues"
+  }
+}

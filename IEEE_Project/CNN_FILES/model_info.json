@@ -1,0 +1,15 @@
+{
+  "model_architecture": "BrainNodeClassifierCNN",
+  "input_channels": 4,
+  "num_electrodes": 14,
+  "num_regions": 5,
+  "num_hemispheres": 2,
+  "num_functional_areas": 7,
+  "training_epochs": 50,
+  "learning_rate": 0.001,
+  "batch_size": 8,
+  "training_samples": 162,
+  "validation_samples": 41,
+  "device_used": "cpu",
+  "training_completed": "2025-08-09T13:07:18.044638"
+}
