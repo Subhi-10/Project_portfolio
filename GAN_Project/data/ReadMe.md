@@ -7,12 +7,12 @@ Due to storage constraints, only a reduced version is uploaded here.
 
 ##  Folder Structure
 
-- **subset_complete/**  
+- **complete/**  
   Contains **50 artifact images** collected from publicly available sources:
   - The Metropolitan Museum of Art (Met Museum)
   - Cleveland Museum of Art
 
-- **subset_damaged/**  
+- **damaged/**  
   Contains the **damaged counterparts of the 50 subset images**.  
   Each image in `subset_complete/` has a corresponding damaged version in this folder.
 
